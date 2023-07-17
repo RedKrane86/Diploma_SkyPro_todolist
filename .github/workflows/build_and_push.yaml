@@ -35,7 +35,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "deploy/*"
+          source: "./todolist/deploy/*"
           target: "diploma-todolist"
           strip_components: 1
 
