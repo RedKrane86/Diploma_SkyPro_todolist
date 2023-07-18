@@ -38,4 +38,3 @@ jobs:
           source: "./todolist/deploy/*"
           target: "diploma-todolist"
           strip_components: 1
-
