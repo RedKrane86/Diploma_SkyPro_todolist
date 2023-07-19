@@ -61,5 +61,3 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             docker compose prune -f -a
-
-
