@@ -27,6 +27,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout
         uses: actions/checkout@v3
       - name: Copy on server
@@ -38,3 +39,27 @@ jobs:
           source: "./todolist/deploy/*"
           target: "diploma-todolist"
           strip_components: 1
+
+      - name: Docker-compose up
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd diploma-todolist
+            cd deploy
+            docker compose pull
+            docker compose down
+            docker compose up -d
+
+      - name: Clean up
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            docker compose prune -f -a
+
+
