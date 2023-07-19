@@ -62,4 +62,4 @@ jobs:
           script: |
             cd diploma-todolist
             cd deploy
-            docker compose prune -f -a
+            docker system prune -f -a
