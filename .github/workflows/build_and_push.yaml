@@ -60,4 +60,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
+            cd diploma-todolist
+            cd deploy
             docker compose prune -f -a
