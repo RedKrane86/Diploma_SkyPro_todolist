@@ -9,8 +9,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
     healthcheck:
       test: pg_isready -U ${DB_USER} -d ${DB_NAME}
-      interval: 5s
-      timeout: 3s
+      interval: 7s
+      timeout: 5s
       retries: 10
     ports:
       - "5432:5432"
@@ -53,7 +53,7 @@ services:
       - django_static:/opt/app/static/
 
   frontend:
-    image: sermalenk/skypro-front:lesson-34
+    image: sermalenk/skypro-front:lesson-35
     restart: on-failure
     ports:
       - "80:80"
