@@ -51,7 +51,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'social_django',
     'environ',
+    'django_filters',
     'core',
+    'goals',
 ]
 
 MIDDLEWARE = [
@@ -158,3 +160,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+}
