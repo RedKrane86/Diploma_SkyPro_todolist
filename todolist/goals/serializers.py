@@ -44,7 +44,7 @@ class GoalCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class GoalSerializer(GoalCreateCategorySerializer):
+class GoalSerializer(GoalCreateSerializer):
     user = ProfileSerializer(read_only=True)
 
 
