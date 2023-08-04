@@ -1,6 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework import permissions, filters, status
+from rest_framework import permissions, filters
 
 from goals.filters import GoalDateFilter
 from goals.models import Goal
@@ -8,6 +8,7 @@ from goals.serializers import GoalSerializer, GoalCreateSerializer
 
 
 class GoalCreateView(CreateAPIView):
+    model = Goal
     serializer_class = GoalCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
 

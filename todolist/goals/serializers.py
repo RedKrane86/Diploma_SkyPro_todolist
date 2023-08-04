@@ -4,7 +4,7 @@ from core.serializers import ProfileSerializer
 from goals.models import GoalCategory, GoalComments, Goal
 
 
-class GoalCreateSerializer(serializers.ModelSerializer):
+class GoalCreateCategorySerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     def validate_category(self, value: GoalCategory) -> GoalCategory:
@@ -22,7 +22,29 @@ class GoalCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class GoalSerializer(GoalCreateSerializer):
+class GoalCategorySerializer(GoalCreateCategorySerializer):
+    user = ProfileSerializer(read_only=True)
+
+
+class GoalCreateSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    def validate_goal(self, value: Goal) -> Goal:
+        if value.status == Goal.Status.archived:
+            raise serializers.ValidationError("not allowed in deleted goal")
+
+        if value.user != self.context["request"].user:
+            raise serializers.ValidationError("not owner of goal")
+
+        return value
+
+    class Meta:
+        model = Goal
+        read_only_fields = ("id", "created", "updated", "user")
+        fields = "__all__"
+
+
+class GoalSerializer(GoalCreateCategorySerializer):
     user = ProfileSerializer(read_only=True)
 
 

@@ -40,7 +40,7 @@ class Goal(models.Model):
     user = models.ForeignKey(User, verbose_name="Автор", on_delete=models.PROTECT)
     created = models.DateTimeField(verbose_name="Дата создания")
     updated = models.DateTimeField(verbose_name="Дата последнего обновления")
-    description = models.CharField(verbose_name="Описание", blank=True)
+    description = models.TextField(verbose_name="Описание", blank=True)
     category = models.ForeignKey(GoalCategory, verbose_name="Категория", on_delete=models.PROTECT)
     due_date = models.DateTimeField(verbose_name="Дата выполнения", null=True, blank=True)
 
@@ -50,6 +50,12 @@ class Goal(models.Model):
     priority = models.PositiveSmallIntegerField(
         verbose_name="Приоритет", choices=Priority.choices, default=Priority.medium
     )
+
+    def save(self, *args, **kwargs):
+        if not self.id:  # Когда объект только создается, у него еще нет id
+            self.created = timezone.now()  # проставляем дату создания
+        self.updated = timezone.now()  # проставляем дату обновления
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Цель"
@@ -62,6 +68,12 @@ class GoalComments(models.Model):
     updated = models.DateTimeField(verbose_name="Дата последнего обновления")
     text = models.TextField(verbose_name="Текст")
     goal = models.ForeignKey(Goal, verbose_name="Цель", on_delete=models.PROTECT)
+
+    def save(self, *args, **kwargs):
+        if not self.id:  # Когда объект только создается, у него еще нет id
+            self.created = timezone.now()  # проставляем дату создания
+        self.updated = timezone.now()  # проставляем дату обновления
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Комментарий"

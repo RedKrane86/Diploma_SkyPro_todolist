@@ -7,6 +7,7 @@ from goals.serializers import GoalCommentCreateSerializer, GoalCommentSerializer
 
 
 class GoalCommentCreateView(CreateAPIView):
+    model = GoalComments
     serializer_class = GoalCommentCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
 

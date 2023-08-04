@@ -33,7 +33,7 @@ services:
     env_file: .env
     environment:
       DB_HOST: db
-      DEBUG: false
+      DEBUG: true
     depends_on:
       db:
         condition: service_healthy
