@@ -4,6 +4,7 @@ from rest_framework import permissions, filters
 from rest_framework.pagination import LimitOffsetPagination
 
 from goals.models import GoalCategory, Goal
+from goals.permission_classes import GoalCategoryPermissions
 from goals.serializers import GoalCreateCategorySerializer, GoalCategorySerializer
 
 
@@ -15,7 +16,7 @@ class GoalCategoryCreateView(CreateAPIView):
 
 class GoalCategoryListView(ListAPIView):
     model = GoalCategory
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, GoalCategoryPermissions]
     serializer_class = GoalCategorySerializer
     pagination_class = LimitOffsetPagination
     filter_backends = [
@@ -27,23 +28,19 @@ class GoalCategoryListView(ListAPIView):
     search_fields = ["title"]
 
     def get_queryset(self):
-        return GoalCategory.objects.select_related('user').filter(
-            user=self.request.user, is_deleted=False)
+        return GoalCategory.objects.filter(
+            board__participants__user=self.request.user,
+            is_deleted=False,
+        )
 
 
 class GoalCategoryView(RetrieveUpdateDestroyAPIView):
     model = GoalCategory
     serializer_class = GoalCategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, GoalCategoryPermissions]
 
     def get_queryset(self):
-        return GoalCategory.objects.select_related(
-            'user'
-        ).filter(
-            user=self.request.user, is_deleted=False
-        ).exclude(
-            is_deleted=True
-        )
+        return GoalCategory.objects.filter(is_deleted=False)
 
     def perform_destroy(self, instance: GoalCategory):
         with transaction.atomic():

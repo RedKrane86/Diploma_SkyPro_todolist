@@ -5,6 +5,7 @@ from rest_framework.pagination import LimitOffsetPagination
 
 from goals.filters import GoalDateFilter
 from goals.models import Goal
+from goals.permission_classes import GoalPermissions
 from goals.serializers import GoalSerializer, GoalCreateSerializer
 
 
@@ -16,7 +17,7 @@ class GoalCreateView(CreateAPIView):
 
 class GoalListView(ListAPIView):
     serializer_class = GoalSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, GoalPermissions]
     pagination_class = LimitOffsetPagination
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
     filterset_class = GoalDateFilter
@@ -25,20 +26,20 @@ class GoalListView(ListAPIView):
     search_fields = ['title', 'description']
 
     def get_queryset(self):
-        return Goal.objects.select_related(
-            'user'
-        ).filter(
-            user=self.request.user, category__is_deleted=False
+        return Goal.objects.filter(
+            category__board__participants__user=self.request.user,
+            category__is_deleted=False
         ).exclude(
-            status=Goal.Status.archived)
+            status=Goal.Status.archived
+        )
 
 
 class GoalDetailView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, GoalPermissions]
     serializer_class = GoalSerializer
 
     def get_queryset(self):
-        return Goal.objects.select_related('user').filter(
+        return Goal.objects.filter(
             category__is_deleted=False
         ).exclude(
             status=Goal.Status.archived)
