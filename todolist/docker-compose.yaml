@@ -27,6 +27,20 @@ services:
         condition: service_healthy
     command: python manage.py migrate
 
+  bot:
+    image: redkrane/diploma-todolist:latest
+    env_file: .env
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+      run_migrations:
+        condition: service_completed_successfully
+    volumes:
+      - ./.env:/app/.env
+    command: python manage.py runbot
+
   api:
     build: .
     image: redkrane/diploma-todolist:latest
@@ -44,6 +58,7 @@ services:
     volumes:
       - ./core:/opt/app/core/
       - ./goals:/opt/app/goals/
+      - ./bot:/opt/app/bot/
       - ./todolist:/opt/app/todolist/
 
   collect_static:
@@ -54,7 +69,7 @@ services:
       - django_static:/opt/app/static/
 
   frontend:
-    image: sermalenk/skypro-front:lesson-37
+    image: sermalenk/skypro-front:lesson-38
     restart: on-failure
     ports:
       - "80:80"

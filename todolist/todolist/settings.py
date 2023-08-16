@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_filters',
     'core',
     'goals',
+    'bot',
 ]
 
 MIDDLEWARE = [
@@ -175,3 +176,5 @@ LOGGING = {
         },
     },
 }
+
+BOT_TOKEN = env.str('BOT_TOKEN')
