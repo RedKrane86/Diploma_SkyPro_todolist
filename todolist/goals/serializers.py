@@ -9,7 +9,7 @@ from goals.models import GoalCategory, GoalComments, Goal, Board, BoardParticipa
 
 class GoalCreateCategorySerializer(serializers.ModelSerializer):
     """
-    Сериализатор для создания и отоброжения категорий целей
+    Сериализатор для создания и отображения категорий целей
     """
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
@@ -38,9 +38,17 @@ class GoalCategorySerializer(GoalCreateCategorySerializer):
 
 
 class GoalCreateSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для создания и отображения целей
+    """
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     def validate_category(self, category: GoalCategory) -> GoalCategory:
+        """
+        Валидация категорий. Выдает ошибку если:
+            - Категории не существует
+            - Пользователь не создатель и не редактор
+        """
         if category.is_deleted:
             raise ValidationError('Category not exists')
         if not BoardParticipant.objects.filter(
@@ -58,13 +66,24 @@ class GoalCreateSerializer(serializers.ModelSerializer):
 
 
 class GoalSerializer(GoalCreateSerializer):
+    """
+    Сериализатор целей с пользователем
+    """
     user = ProfileSerializer(read_only=True)
 
 
 class GoalCommentCreateSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор создания комментариев
+    """
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     def validate_goal(self, goal: Goal) -> Goal:
+        """
+        Валидация комментариев. Выдает ошибку если:
+            - Цели не существует
+            - Пользователь не создатель и не редактор
+        """
         if goal.status == Goal.Status.archived:
             raise ValidationError('Goal not exists')
         if not BoardParticipant.objects.filter(
@@ -82,11 +101,17 @@ class GoalCommentCreateSerializer(serializers.ModelSerializer):
 
 
 class GoalCommentSerializer(GoalCommentCreateSerializer):
+    """
+    Сериализатор комментариев с пользователем
+    """
     user = ProfileSerializer(read_only=True)
     goals = serializers.PrimaryKeyRelatedField(read_only=True)
 
 
 class BoardCreateSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор создания доски
+    """
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
@@ -106,6 +131,9 @@ class BoardCreateSerializer(serializers.ModelSerializer):
 
 
 class BoardParticipantSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор доски для участников
+    """
     role = serializers.ChoiceField(required=True, choices=BoardParticipant.editable_choices)
     user = serializers.SlugRelatedField(slug_field="username", queryset=User.objects.all())
 
@@ -116,6 +144,9 @@ class BoardParticipantSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор доски
+    """
     participants = BoardParticipantSerializer(many=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
@@ -125,6 +156,11 @@ class BoardSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created", "updated")
 
     def update(self, instance, validated_data: dict):
+        """
+        Сложная логика для обновления доски.
+        Позволяет добавлять новых участников или выдавать права уже существующим,
+        не затрагивая старых участников
+        """
         owner = validated_data.pop("user")
         new_participants = validated_data.pop("participants")
         new_by_id = {part["user"].id: part for part in new_participants}
@@ -151,6 +187,9 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class BoardListSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор отображения всех досок
+    """
     class Meta:
         model = Board
         fields = "__all__"

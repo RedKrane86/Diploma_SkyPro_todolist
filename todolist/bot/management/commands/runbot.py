@@ -8,6 +8,9 @@ from goals.models import Goal, GoalCategory
 
 
 class Command(BaseCommand):
+    """
+    Класс команд для бота
+    """
 
     help = "run bot"
 
@@ -17,6 +20,10 @@ class Command(BaseCommand):
         self.users_data = {}
 
     def handle(self, *args, **options):
+        """
+        Основная функция работы бота, работает через бесконечный цикл.
+        Каждое новое сообщение получает индекс + 1
+        """
         offset = 0
         while True:
             res = self.tg_client.get_updates(offset=offset)
@@ -25,6 +32,12 @@ class Command(BaseCommand):
                 self.handle_message(item.message)
 
     def handle_message(self, msg: Message):
+        """
+        Обработка сообщения пользователя.
+            - Если пользователь не авторизован передает сообщение в функцию handle_unauthorized_user
+            - Если пользователь авторизован передает сообщение в функцию handle_authorized_user
+
+        """
         tg_user, created = TgUser.objects.get_or_create(chat_id=msg.chat.id)
 
         if tg_user.user:
@@ -33,6 +46,13 @@ class Command(BaseCommand):
             self.handle_unauthorized_user(tg_user, msg)
 
     def handle_authorized_user(self, tg_user: TgUser, msg: Message):
+        """
+        Функция обработки сообщений авторизованных пользователей.
+        Реагирует на три команды:
+            - '/goals'  показать все цели
+            - '/create' создать новую цель в существующей категории
+            - '/cancel' отменить текущую операцию
+        """
         commands: list = ['/goals', '/create', '/cancel']
         create_chat: dict | None = self.users_data.get(msg.chat.id, None)
         self.tg_client.send_message(
@@ -103,6 +123,10 @@ class Command(BaseCommand):
             self.tg_client.send_message(chat_id=msg.chat.id, text=f'Неизвестная команда')
 
     def handle_unauthorized_user(self, tg_user: TgUser, msg: Message):
+        """
+        Функция обработки сообщений ек авторизованных пользователей
+        Генерирует код для верификации на сайте
+        """
         code = tg_user.generate_verification_code()
         tg_user.verification_code = code
         tg_user.save()

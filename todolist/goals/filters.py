@@ -6,6 +6,13 @@ from goals.models import Goal
 
 
 class GoalDateFilter(rest_framework.FilterSet):
+    """
+    Фильтр для отображения даты - времени целей, а так же:
+        - Дед лайн
+        - Категория
+        - Статус
+        - Приоритет
+    """
     class Meta:
         model = Goal
         fields = {

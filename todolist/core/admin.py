@@ -7,6 +7,9 @@ from core.models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+    """
+    Кастомизированный класс админки для пользователя
+    """
     readonly_fields = ("last_login", "date_joined")
     fieldsets = (
         (None, {"fields": ("username", "password")}),

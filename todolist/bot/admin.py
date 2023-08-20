@@ -7,6 +7,9 @@ from bot.models import TgUser
 
 @admin.register(TgUser)
 class TgUserAdmin(admin.ModelAdmin):
+    """
+    Класс админ панели пользователя телеграмм
+    """
     list_display = ('chat_id', 'user')
     readonly_fields = ['verification_code']
     search_fields = ['chat_id', 'username']

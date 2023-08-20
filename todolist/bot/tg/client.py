@@ -14,14 +14,24 @@ T = TypeVar('T', bound=BaseModel)
 
 
 class TgClient:
+    """
+    Класс взаимодействия с api.telegram.org/bot
+    """
     def __init__(self, token: str | None = None):
         self.__token = token if token else settings.BOT_TOKEN
         self.__url = f'https://api.telegram.org/bot{self.__token}/'
 
     def __get_url(self, method: str) -> str:
+        """
+        Автоматически подставляет под url команду
+        """
         return f'{self.__url}{method}'
 
     def get_updates(self, offset: int = 0, timeout: int = 60, **kwargs) -> GetUpdatesResponse:
+        """
+        Функция обновления чата бота
+        По истечении времени timeout перестает получать обновления
+        """
         url = self.__get_url('getUpdates')
         response = requests.get(url, params={'timeout': timeout, 'offset': offset, 'allowed_updates': ['message']})
 
@@ -34,10 +44,16 @@ class TgClient:
         return self.__serialize_tg_response(GetUpdatesResponse, data)
 
     def send_message(self, chat_id: int, text: str, **kwargs) -> SendMessageResponse:
+        """
+        Функция отправки сообщений бота
+        """
         data = self._get('sendMessage', chat_id=chat_id, text=text, **kwargs)
         return self.__serialize_tg_response(SendMessageResponse, data)
 
     def _get(self, method: str, **params) -> dict:
+        """
+        Вспомогательная функция для получения запроса из сообщения
+        """
         url = self.__get_url(method)
         params.setdefault('timeout', 10)
         response = requests.get(url, params=params)
@@ -48,6 +64,9 @@ class TgClient:
 
     @staticmethod
     def __serialize_tg_response(serializer_class: Type[T], data: dict) -> T:
+        """
+        Вспомогательная функция. Подставляет сериализатор с данными пришедшими на вход
+        """
         try:
             return serializer_class(**data)
         except ValidationError:

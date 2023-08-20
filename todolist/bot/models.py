@@ -4,6 +4,9 @@ from django.utils.crypto import get_random_string
 
 
 class TgUser(models.Model):
+    """
+    Класс модели пользователя телеграмм
+    """
     chat_id = models.BigIntegerField(primary_key=True, editable=False, unique=True)
     username = models.CharField(max_length=255, null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)

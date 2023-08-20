@@ -9,12 +9,18 @@ from goals.serializers import GoalCreateCategorySerializer, GoalCategorySerializ
 
 
 class GoalCategoryCreateView(CreateAPIView):
+    """
+    Представление для создания категории
+    """
     model = GoalCategory
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = GoalCreateCategorySerializer
 
 
 class GoalCategoryListView(ListAPIView):
+    """
+    Представление для отображения всех категорий
+    """
     model = GoalCategory
     permission_classes = [permissions.IsAuthenticated, GoalCategoryPermissions]
     serializer_class = GoalCategorySerializer
@@ -28,6 +34,9 @@ class GoalCategoryListView(ListAPIView):
     search_fields = ["title"]
 
     def get_queryset(self):
+        """
+        Ответ фильтруется по списку участников
+        """
         return GoalCategory.objects.filter(
             board__participants__user=self.request.user,
             is_deleted=False,
@@ -35,14 +44,24 @@ class GoalCategoryListView(ListAPIView):
 
 
 class GoalCategoryView(RetrieveUpdateDestroyAPIView):
+    """
+    Представление для детального просмотра, обновления и удаления категории
+    """
     model = GoalCategory
     serializer_class = GoalCategorySerializer
     permission_classes = [permissions.IsAuthenticated, GoalCategoryPermissions]
 
     def get_queryset(self):
+        """
+        Удаленные категории не отображаются
+        """
         return GoalCategory.objects.filter(is_deleted=False)
 
     def perform_destroy(self, instance: GoalCategory):
+        """
+        Категория не удаляется, а архивируется
+        Пользователь их не видит, но видит администратор через админ панель
+        """
         with transaction.atomic():
             instance.is_deleted = True
             instance.save()
